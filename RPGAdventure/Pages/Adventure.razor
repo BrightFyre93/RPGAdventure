@@ -1,0 +1,135 @@
+﻿@page "/adventure"
+@using System.ComponentModel.DataAnnotations
+
+<PageTitle>Adventure</PageTitle>
+
+<h1>RPG Adventure</h1>
+
+<EditForm hidden="@hideDataInput" Model="@inputData" OnSubmit="@StartAdventure">
+    <InputText id="name" @bind-Value="inputData.Name" />
+
+    <button type="submit">Start Adventure</button>
+</EditForm>
+
+<p hidden="@hideAttackInput" role="status">Name: @adventurer.Name</p>
+<p hidden="@hideStatus" role="status">Level: @adventurer.Level</p>
+<p hidden="@hideStatus" role="status">Experience: @adventurer.Experience/@adventurer.MaxExperience</p>
+
+<button hidden="@hideAttackInput" class="btn btn-primary" @onclick="AttackMonter">Attack Monster</button>
+
+<EditForm hidden="@hideMonsterDataInput" Model="@inputMonsterData" OnSubmit="@ChooseMonster">
+    <InputNumber id="level" @bind-Value="inputMonsterData.Level" />
+
+    <button type="submit">Start Adventure</button>
+</EditForm>
+
+@code {
+    private Adventurer? adventurer = new Adventurer();
+    private Monster? monster = new Monster();
+    private InputData? inputData = new InputData();
+    private InputMonsterData? inputMonsterData = new InputMonsterData();
+    private bool hideDataInput = false;
+    private bool hideMonsterDataInput = true;
+    private bool hideAttackInput = true;
+    private bool hideStatus = true;
+
+    protected void StartAdventure() 
+    {
+        hideDataInput = true;
+        hideMonsterDataInput = false;
+        adventurer.Name = inputData?.Name;
+    }
+
+    protected void ChooseMonster()
+    {
+        hideMonsterDataInput = true;
+        hideAttackInput = false;
+        hideStatus = false;
+        monster.Level = inputMonsterData.Level;
+        monster.Stats = new MonsterStats(monster.Level);
+    }
+
+    protected void AttackMonter()
+    {
+        // Reduce HP of both monster and adventurer
+        // Give Experience To Adventurer
+        // Raise Level and reset stats if level raised
+        // Choose Next Monster
+        // If Adventured dead, finish game
+    }
+
+    public class InputData
+    {
+        [Required]
+        [StringLength(10, ErrorMessage = "Name is too long.")]
+        public string? Name { get; set; }
+    }
+
+    public class InputMonsterData
+    {
+        [Required]
+        public int Level { get; set; }
+    }
+
+    public class Monster
+    {
+        public int Level { get; set; }
+
+        public MonsterStats? Stats { get; set; }
+
+        public int Experience => Level * 50;
+    }
+
+    public class Adventurer
+    {
+        public Adventurer()
+        {
+            Level = 1;
+            Experience = 0;
+            Stats = new AdventureStats(Level);
+        }
+
+        public string? Name { get; set; }
+
+        public int Level { get; set; }
+
+        public double Experience { get; set; }
+
+        public double MaxExperience => Level * 100.0;
+
+        public AdventureStats? Stats { get; set; }
+    }
+
+    public class MonsterStats : Stats
+    {
+        public MonsterStats(int level)
+        {
+            MaxHP = level * 10;
+            HP = MaxHP;
+            Attack = 2;
+            Defense = 2;
+        }
+    }
+
+    public class AdventureStats : Stats
+    {
+        public AdventureStats(int level)
+        {
+            MaxHP = level * 5;
+            HP = MaxHP;
+            Attack = 5;
+            Defense = 5;
+        }
+    }
+
+    public class Stats
+    {
+        public int HP { get; set; }
+
+        public int MaxHP { get; set; }
+
+        public int Attack { get; set; }
+
+        public int Defense { get; set; }
+    }
+}
